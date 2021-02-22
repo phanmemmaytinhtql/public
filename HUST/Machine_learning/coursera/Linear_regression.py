@@ -37,6 +37,11 @@ class GradientDescent:
     def objective_value(self):
         return self.y(self.x)
 
+
+class NormalEquation:
+    pass
+
+
 solver = GradientDescent(y, dy)
 solver.solve([0, 0])
 print(solver.solution())
