@@ -92,7 +92,7 @@ hist(A, 50) % histogram of A with 50 bins
 
 pwd % return the current path
 
-load newfile.py % load file (maybe in form of matrix)
+load('newfile.py') % load file (maybe in form of matrix)
 
 who % show variables in the workspace
 whos % gives more details
@@ -115,5 +115,49 @@ ceil(v)
 
 flipud(A)
 
+t = [0:0.01:0.98]
+y = sin(t)
+z = cos(t)
+plot(t, y)
+hold on;
+plot(t, z, 'r')
+xlable('time')
+ylabel('value')
+legend('sin', 'cos')
+title('My plot')
+print -dpng 'my_plot.png'
+close
+figure(1); plot(t, y)
+figure(2), plot(t, z)
+subplot(1, 2, 1) % divide plot a 1 by 2 grid, access the 1st element
+plot(t, y)
+subplot(1, 2, 2) % ......
+plot(t, z)
+axis([-3 3 -2 2])
+clf
+imagesc(A)
+imagesc(A), colorbar, colormap gray;
+
+% NOTE that octave indexes from 1, not 0.
+v = magic(3)(:)
+for i = 1:10,
+    v(i) = 2^i;
+    end;
+
+i = 1
+while true,
+    v(i) = 100;
+    if i == 1,
+        disp('Starting');
+    elseif i == 2,
+        disp('OK');
+    else
+        break;
+        end;
+    i = i + 1;
+    end;
+
+
+addpath('/media/tran/19EC-1803/Working_space/public/HUST/Machine_learning/coursera') % add address to octave search path
 
 PS1('>> ')
