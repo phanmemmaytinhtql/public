@@ -87,10 +87,15 @@ rand(1, 3) % 1 by 3 matrix of all random numbers between 0 and 1
 
 randn(1, 3) % 1 by 3 matrix of random numbers in Gaussian distribution with mean 0 and standard deviation 1
 
+mean(v)
+std(v) % compute standard derivative
+
 w = -6 + sqrt(10)*randn(1, 10000);
 hist(A, 50) % histogram of A with 50 bins
 
 pwd % return the current path
+
+addpath('/media/tran/19EC-1803/Working_space/public/HUST/Machine_learning/coursera') % add address to octave search path
 
 load('newfile.py') % load file (maybe in form of matrix)
 
@@ -158,6 +163,5 @@ while true,
     end;
 
 
-addpath('/media/tran/19EC-1803/Working_space/public/HUST/Machine_learning/coursera') % add address to octave search path
 
 PS1('>> ')
