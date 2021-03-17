@@ -104,8 +104,6 @@ add constraint invoice_chk_state check (state = 'R' or state = 'O');
 
 >> Q6:
 
-delete from customer;
-
 alter table customer
 alter column address drop not null,
 alter column city drop not null,
