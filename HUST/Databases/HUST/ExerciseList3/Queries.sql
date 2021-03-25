@@ -139,17 +139,53 @@ where rfrns in (select replacement.product
 
 select invoice.inv_no, intervention.interv_no, customer.cust_name
 from invoice, intervention, customer
-where invoice.inv_no = intervention.interv_no and invoice.customer = customer.cust_no
+where invoice.inv_no = intervention.invoice and invoice.customer = customer.cust_no
 	and state <> 'R';
 
 >> Q13:
+
+select invoice.inv_date
+from technician, intervention, invoice, replacement
+where intervention.technician = technician.tech_no and intervention.interv_no = replacement.intervention and intervention.invoice = invoice.inv_no
+	and technician.tech_name = 'Saultier';
+
+>> Q14:
+
+select product.designation, intervention.duration, invoice.state
+from customer, replacement, intervention, invoice, product
+where product.rfrns = replacement.product
+	and replacement.intervention = intervention.interv_no
+	and intervention.invoice = invoice.inv_no
+	and invoice.customer = customer.cust_no
+	and customer.cust_name = 'Provent';
+
+>> Q15:
+
+select inv_no
+from invoice, customer
+where invoice.customer = customer.cust_no
+	and ((cust_name = 'Rivoire' and state = 'R')
+		or (cust_name = 'Favero' and state <> 'R'));
+
+>> Q16:
+
+select cust_no
+from customer
+except
+select customer
+from invoice
+
+>> Q17:
+
+select invoice
+from technician, intervention
+where intervention.technician = technician.tech_no
+	and tech_name = 'Bonnaz'
+intersect
+select invoice
+from technician, intervention
+where intervention.technician = technician.tech_no
+	and tech_name = 'Mauras';
 */
-
-
-
-
-
-
-
 
 
