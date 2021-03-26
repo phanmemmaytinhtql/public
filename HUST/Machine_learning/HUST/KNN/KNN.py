@@ -2,14 +2,17 @@ import math
 from Distance import *
 
 class NearestNeighbor:
-    def __init__(self, X_train, y_train):
+    def __init__(self):
         self.X_train = None
         self.y_train = None
-        self.NB = []
+        self.NB = None
+
+    def train_model(self, X, y):
+        self.X_train = X
+        self.y_train = y
 
 
-
-    def predict(self, z, k):
+    def predict(self, Z, k):
         raise NotImplementedError
 
     def _analyze_neighbor(self, z, type='Euclid'):
@@ -17,6 +20,7 @@ class NearestNeighbor:
 
         [[distance][distance_weight][index in D_train]]
         """
+        self.NB = []
         for j in range(len(self.X_train)):
             d = compute_distance(z, self.X_train[j], type)
             v = self._compute_distance_weight(d)
@@ -36,18 +40,24 @@ class NearestNeighbor:
             return math.exp(- d * d / (alpha * alpha))
 
 class NearestNeighborRegression(NearestNeighbor):
-     def predict(self, z, k):
-         self._analyze_neighbor(z)
-         return sum(self.NB[i][1] * self.y[self.NB[i][2]] for i in range(k)) / \
-                sum(self.NB[i][1] for i in range(k))
+     def predict(self, Z, k):
+         expected = []
+         for z in Z:
+             self._analyze_neighbor(z)
+             expected.append(sum(self.NB[i][1] * self.y[self.NB[i][2]] for i in range(k)) / \
+                    sum(self.NB[i][1] for i in range(k)))
+         return expected
 
 class NearestNeighborClassification(NearestNeighbor):
-    def predict(self, z, k):
-        self._analyze_neighbor(z)
-        class_ranking = [[0, i] for i in range(len(set(self.y_train)))]
-        for i in range(k):
-            class_ranking[self.y_train[self.NB[i][2]]][0] += self.NB[i][1]
-        return max(class_ranking)[1]
+    def predict(self, Z, k):
+        expected = []
+        for z in Z:
+            self._analyze_neighbor(z)
+            class_ranking = [[0, i] for i in range(len(set(self.y_train)))]
+            for i in range(k):
+                class_ranking[self.y_train[self.NB[i][2]]][0] += self.NB[i][1]
+            expected.append(max(class_ranking)[1])
+        return expected
 
 dataset = [[2.7810836, 2.550537003, 0],
            [1.465489372, 2.362125076, 0],
@@ -66,6 +76,8 @@ for *x, y in dataset:
     X_train.append(x)
     y_train.append(y)
 
-solver = NearestNeighborClassification(X_train, y_train)
-print(solver.predict(X_train[0], 3), y_train[0])
-print(solver.get_neighbor())
+solver = NearestNeighborClassification()
+solver.train_model(X_train, y_train)
+prediction = solver.predict(X_train, 3)
+print(prediction)
+print(y_train)
