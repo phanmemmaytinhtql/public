@@ -1,22 +1,24 @@
 from Distance import *
 import numpy as np
+import pandas as pd
+import copy
 
 
 class KNeighbors:
     def __init__(self, k):
         self.k = 3
-        self.X_train = None
-        self.y_train = None
+        self.X = None
+        self.Y = None
 
-    def fit(self, X_train, y_train):
+    def fit(self, X, Y):
         """Save data and fit hyper-parameters.
 
         dataframe/numpy/nested list:param X_train:
         dataframe/numpy/list:param y_train:
         none:return:
         """
-        self.X_train = X_train      # IMPLEMENT deepcopy here
-        self.y_train = y_train
+        self.X = copy.deepcopy(X)      # assume X is dataframe
+        self.Y = copy.deepcopy(Y)      # assume Y is dataframe
         self.preprocess()
 
     def preprocess(self):
@@ -24,13 +26,19 @@ class KNeighbors:
         # clean missing values
         self.clean_data()
 
+        # label encode and to numeric
+        # self.encode()
 
     def clean_data(self):
-        for i in range(len(self.X_train)):
-            if None in self.X_train[i] or None == self.y_train[i] \
-                    or np.nan in self.X_train[i] or np.nan == self.y_train[i]:
-                print(i)
+        self.X = self.X.dropna()
+        # Problem: how to drop with y as well?
 
+    def encode(self):
+        for j in range(len(self.X[0])):
+            col_type = type(eval(self.X[0, j]))
+
+        # print("After encoding:")
+        # print(self.X[:5])
 
 dataset = [[2.7810836, 2.550537003, 0],
            [1.465489372, 2.362125076, 0],
@@ -43,12 +51,10 @@ dataset = [[2.7810836, 2.550537003, 0],
            [8.675418651, -0.242068655, 1],
            [7.673756466, 3.508563011, 1]]
 
-# Separate dataset into training and testing domain.
-X_train = []
-y_train = []
-for *x, y in dataset:
-    X_train.append(x)
-    y_train.append(y)
+df = pd.read_csv("iris.csv")
+features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
+X = df[features]
+Y = df.iris_class
+
 model = KNeighbors(3)
-model.fit(X_train, y_train)
-model.clean_data()
+model.fit(X, Y)
