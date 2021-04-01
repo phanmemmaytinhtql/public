@@ -1,18 +1,22 @@
-def euclid_distance(row1, row2):
-    return geometry(row1, row2)
+def euclid_distance(row1, row2, coef=None):
+    return geometry(row1, row2, coef)
 
 
-def manhattan_distance(row1, row2):
-    return geometry(row1, row2, p=1)
+def manhattan_distance(row1, row2, coef=None):
+    return geometry(row1, row2, coef, p=1)
 
 
-def chebyshev_distance(row1, row2):
-    return max(abs(row1[i] - row2[i]) for i in range(len(row1)))
+def chebyshev_distance(row1, row2, coef=None):
+    if coef is None:
+        coef = [1]*len(row1)
+    return max(abs(row1[i] - row2[i])*coef[i] for i in range(len(row1)))
 
 
-def geometry(row1, row2, p=2):
-    """Compute geometry distance between two instance. Default Euclid distance."""
-    return (sum(abs((row1[i] - row2[i])) ** p for i in range(len(row1)))) ** (1 / p)
+def geometry(row1, row2, coef=None, p=2):
+    """Compute geometry distance between two instance."""
+    if coef is None:
+        coef = [1]*len(row1)
+    return (sum(abs((row1[i] - row2[i])) ** p * coef[i] for i in range(len(row1)))) ** (1 / p)
 
 
 def hamming_distance(row1, row2):
@@ -31,3 +35,4 @@ def cosine_similarity(row1, row2):
     length1 = geometry(row1, [0, 0, 0])
     length2 = geometry(row2, [0, 0, 0])
     return cross_product / (length1 * length2)
+

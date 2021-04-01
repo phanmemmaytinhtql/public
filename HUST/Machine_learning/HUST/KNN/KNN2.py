@@ -23,12 +23,22 @@ class KNeighbors:
         dataframe/numpy/list:param y_train:
         none:return:
         """
-        self.df = copy.deepcopy(dataset)  # assume dataset is dataframe
-        self.features = features
-        self.preprocess(self.df)
-        self.X = self.df[features]
-        self.Y = self.df[target]
+        self.df = copy.deepcopy(dataset)    # assume dataset is dataframe
+        self.features = features            # lít of feature specified by user
+        self.preprocess(self.df)            # clean, encode, normalize data before
+        self.X = self.df[features]          # spliting dataframe into X train
+        self.Y = self.df[target]            # and Y train
         self.attr_weight = [1]*len(features) if attr_weight is None else attr_weight
+
+    def predict(self, dataset):
+        dataset = copy.deepcopy(dataset)
+        self.preprocess(dataset)
+
+        dataset.insert(len(dataset.columns), "KNN_predicted", 0)
+        for row1 in dataset.index:
+            for row2 in self.df.index:
+                self.df.at[row2, "KNN_distance"] = euclid_distance(self.df[row2][:-1], dataset[row1][:-1])
+
 
     def preprocess(self, dataset):          # completed
 
@@ -67,10 +77,6 @@ class KNeighbors:
                 dataset.at[index, col_name] = dataset.at[index, col_name]/(self.max[col_name] - self.min[col_name])
         # Problem: the last for loop should be improved?
 
-    def predict(self, dataset):
-        dataset = copy.deepcopy(dataset)
-        self.preprocess(dataset)
-
 
 
     def training_set(self):
@@ -98,7 +104,8 @@ df = pd.read_csv("healthcare-dataset-stroke-data.csv", index_col='id')
 features = ['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']
 target = 'stroke'
 
+
 model = KNeighbors(3)
 model.fit(df, features, target)
-model.training_set()
-print(model.predict(df[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']].head(5)))
+# model.training_set()
+# print(model.predict(df[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']].head(5)))

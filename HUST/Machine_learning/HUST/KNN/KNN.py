@@ -39,7 +39,7 @@ class NearestNeighbor:
         """
         self.NB = []
         for j in range(len(self.X_train)):
-            d = compute_distance(z, self.X_train[j], type)
+            d = euclid_distance(z, self.X_train[j])
             # INSERT ATTR-WEIGHT HERE
 
             v = self._compute_distance_weight(d)
