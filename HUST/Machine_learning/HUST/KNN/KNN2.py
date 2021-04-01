@@ -7,7 +7,7 @@ import copy
 
 class KNeighbors:
     def __init__(self, k):
-        self.k = 3
+        self.k = k
         self.X = None
         self.Y = None
         self.df = None
@@ -34,10 +34,12 @@ class KNeighbors:
         dataset = copy.deepcopy(dataset)
         self.preprocess(dataset)
 
+        # add another col to save distance
         dataset.insert(len(dataset.columns), "KNN_predicted", 0)
         for row1 in dataset.index:
             for row2 in self.df.index:
                 self.df.at[row2, "KNN_distance"] = euclid_distance(self.df[row2][:-1], dataset[row1][:-1])
+        print(self.df)
 
 
     def preprocess(self, dataset):          # completed
@@ -108,4 +110,4 @@ target = 'stroke'
 model = KNeighbors(3)
 model.fit(df, features, target)
 # model.training_set()
-# print(model.predict(df[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']].head(5)))
+print(model.predict(df[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']].head(1)))
