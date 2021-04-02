@@ -31,34 +31,35 @@ class KNeighbors:
         self.attr_weight = [1]*len(features) if attr_weight is None else attr_weight
 
     def predict(self, dataset):
-        dataset = copy.deepcopy(dataset)
-        self.preprocess(dataset)
+        raise NotImplementedError
 
-        # add another col to save distance
-        dataset.insert(len(dataset.columns), "KNN_predicted", 0)
-        for row1 in dataset.index:
-            for row2 in self.df.index:
-                self.df.at[row2, "KNN_distance"] = euclid_distance(self.df[row2][:-1], dataset[row1][:-1])
-        print(self.df)
+    def nearest_neighbors(self, z):
+        """Find k nearest neighbors of instance x.
+
+        Return [index of neighbor instances ins dataframe, distance, distance weight]."""
+        distances = []                      # create an empty list to store distances to training sets
+
+        for row in self.X.index:            # for each instance in training set
+            dist = euclid_distance(self.X.loc[row], z, self.attr_weight)    # compute distance
+            w = self.compute_distance_weight(dist)                          # compute distance weight
+            distances.append([row, dist, w])
+
+        distances.sort(key=lambda item: item[1])
+
+        return distances[:self.k]           # return k nearest neighbor
 
 
     def preprocess(self, dataset):          # completed
-
-        # clean missing values
-        self.clean_data(dataset)
-
-        # encode non-numeric values to numeric
-        self.encode(dataset)
-
-        # normalize features
-        self.normalize(dataset)
+        self.clean_data(dataset)        # clean missing values
+        self.encode(dataset)            # encode non-numeric values to numeric
+        self.normalize(dataset)         # normalize features
 
     def clean_data(self, dataset):          # completed
         dataset.dropna(inplace=True)
 
     def encode(self, dataset):              # completed
-        if self.look_up is None:        # if we are encoding training set
-            self.look_up = dict()       # initialize lookup table as empty
+        if self.look_up is None:            # if we are encoding training set
+            self.look_up = dict()           # initialize lookup table as empty
             for col_name in dataset.columns:
                 if not is_numeric_dtype(dataset[col_name]):             # for each column that is not numeric
                     unique = set(label for label in dataset[col_name])  # find unique labels of that column
@@ -75,17 +76,39 @@ class KNeighbors:
             self.max = dataset.max()        # find max value for each columns
             self.min = dataset.min()        # find min value for each columns
         for index in dataset.index:             # for each row in dataset
-            for col_name in dataset:            # for each feature in the instance
+            for col_name in self.features:            # for each feature in the instance
                 dataset.at[index, col_name] = dataset.at[index, col_name]/(self.max[col_name] - self.min[col_name])
         # Problem: the last for loop should be improved?
 
-
+    def compute_distance_weight(self, d):   # comleted
+        return 1 / (1 + d)
+        # Question: Other choices of weight formula and alpha
 
     def training_set(self):
         print("Training instance features:")
         print(self.X.head(10))
         print('Training instance target:')
         print(self.Y.head(10))
+
+
+class KNeighborsClassifier(KNeighbors):
+
+    def predict(self, dataset):
+
+        # preprocess test instances before predicting
+        dataset = copy.deepcopy(dataset)
+        self.preprocess(dataset)
+
+        # add KNN_predicted column to the dataset to save predicted class
+        dataset.insert(len(dataset.columns), "KNN_predicted", 0)
+
+        for index in dataset.index:  # for each test instance
+            neighbors = self.nearest_neighbors(dataset.loc[index, self.features])
+            class_rank = [[0, c] for c in sorted(self.Y.unique())]
+            for nei_index, dist, dist_weight in neighbors:
+                class_rank[self.Y[nei_index]][0] += dist_weight
+            dataset.at[index, "KNN_predicted"] = max(class_rank)[1]
+        return dataset
 
 
 dataset = [[2.7810836, 2.550537003, 0],
@@ -107,7 +130,7 @@ features = ['gender','age','hypertension','heart_disease','ever_married','work_t
 target = 'stroke'
 
 
-model = KNeighbors(3)
+model = KNeighborsClassifier(1)
 model.fit(df, features, target)
 # model.training_set()
-print(model.predict(df[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']].head(1)))
+print(model.predict(df[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']].head(1000)))
