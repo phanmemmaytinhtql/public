@@ -24,7 +24,7 @@ class KNeighbors:
         none:return:
         """
         self.df = copy.deepcopy(dataset)    # assume dataset is dataframe
-        self.features = features            # lít of feature specified by user
+        self.features = features            # list of feature specified by user
         self.preprocess(self.df)            # clean, encode, normalize data before
         self.X = self.df[features]          # spliting dataframe into X train
         self.Y = self.df[target]            # and Y train
@@ -37,27 +37,27 @@ class KNeighbors:
         """Find k nearest neighbors of instance x.
 
         Return [index of neighbor instances ins dataframe, distance, distance weight]."""
-        distances = []                      # create an empty list to store distances to training sets
+        neighbors = []                      # an empty list to store neighbors index, distance, weight to training sets
 
         for row in self.X.index:            # for each instance in training set
             dist = euclid_distance(self.X.loc[row], z, self.attr_weight)    # compute distance
-            w = self.compute_distance_weight(dist)                          # compute distance weight
-            distances.append([row, dist, w])
+            w = self._compute_distance_weight(dist)                          # compute distance weight
+            neighbors.append([row, dist, w])
 
-        distances.sort(key=lambda item: item[1])
+        neighbors.sort(key=lambda item: item[1])
 
-        return distances[:self.k]           # return k nearest neighbor
+        return neighbors[:self.k]           # return k nearest neighbor
 
 
     def preprocess(self, dataset):          # completed
-        self.clean_data(dataset)        # clean missing values
-        self.encode(dataset)            # encode non-numeric values to numeric
-        self.normalize(dataset)         # normalize features
+        self._clean_data(dataset)        # clean missing values
+        self._encode(dataset)            # encode non-numeric values to numeric
+        self._normalize(dataset)         # normalize features
 
-    def clean_data(self, dataset):          # completed
+    def _clean_data(self, dataset):          # completed
         dataset.dropna(inplace=True)
 
-    def encode(self, dataset):              # completed
+    def _encode(self, dataset):              # completed
         if self.look_up is None:            # if we are encoding training set
             self.look_up = dict()           # initialize lookup table as empty
             for col_name in dataset.columns:
@@ -71,7 +71,7 @@ class KNeighbors:
                     dataset.at[index, col_name] = self.look_up[(col_name, dataset.at[index, col_name])]
         # Problem: code seems to be very complicated and run not very well
 
-    def normalize(self, dataset):           # completed
+    def _normalize(self, dataset):           # completed
         if self.max is None:                # if we are normalizing the training set
             self.max = dataset.max()        # find max value for each columns
             self.min = dataset.min()        # find min value for each columns
@@ -80,15 +80,9 @@ class KNeighbors:
                 dataset.at[index, col_name] = dataset.at[index, col_name]/(self.max[col_name] - self.min[col_name])
         # Problem: the last for loop should be improved?
 
-    def compute_distance_weight(self, d):   # comleted
+    def _compute_distance_weight(self, d):   # comleted
         return 1 / (1 + d)
         # Question: Other choices of weight formula and alpha
-
-    def training_set(self):
-        print("Training instance features:")
-        print(self.X.head(10))
-        print('Training instance target:')
-        print(self.Y.head(10))
 
 
 class KNeighborsClassifier(KNeighbors):
@@ -102,25 +96,34 @@ class KNeighborsClassifier(KNeighbors):
         # add KNN_predicted column to the dataset to save predicted class
         dataset.insert(len(dataset.columns), "KNN_predicted", 0)
 
-        for index in dataset.index:  # for each test instance
-            neighbors = self.nearest_neighbors(dataset.loc[index, self.features])
-            class_rank = [[0, c] for c in sorted(self.Y.unique())]
+        for index in dataset.index:     # for each test instance
+            neighbors = self.nearest_neighbors(dataset.loc[index, self.features])   # find k nearest neighbor
+            class_rank = [[0, c] for c in sorted(self.Y.unique())]                  # [point, class]
             for nei_index, dist, dist_weight in neighbors:
                 class_rank[self.Y[nei_index]][0] += dist_weight
             dataset.at[index, "KNN_predicted"] = max(class_rank)[1]
         return dataset
+        # Problem: make KNN_predicted as a separate column but keep index
 
 
-dataset = [[2.7810836, 2.550537003, 0],
-           [1.465489372, 2.362125076, 0],
-           [3.396561688, 4.400293529, 0],
-           [1.38807019, 1.850220317, 0],
-           [3.06407232, 3.005305973, 0],
-           [7.627531214, 2.759262235, 1],
-           [5.332441248, 2.088626775, 1],
-           [6.922596716, 1.77106367, 1],
-           [8.675418651, -0.242068655, 1],
-           [7.673756466, 3.508563011, 1]]
+class KNeighborsRegressor(KNeighbors):
+
+    def predict(self, dataset):
+
+        # preprocess test instances before predicting
+        dataset = copy.deepcopy(dataset)
+        self.preprocess(dataset)
+
+        # add KNN_predicted column to the dataset to save predicted class
+        dataset.insert(len(dataset.columns), "KNN_predicted, 0")
+
+        for index in dataset.index:     # for each test instance
+            neighbors = self.nearest_neighbors(dataset.loc[index, self.features])
+            dataset.at[index, "KNN_predicted"] = sum(dist_weight * self.Y[nei_index]
+                                                     for nei_index, dist, dist_weight in neighbors) \
+                                                 / sum(dist_weight for nei_index, dist, dist_weight in neighbors)
+
+
 
 # df = pd.read_csv("iris.csv")
 # features = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
@@ -130,7 +133,7 @@ features = ['gender','age','hypertension','heart_disease','ever_married','work_t
 target = 'stroke'
 
 
-model = KNeighborsClassifier(1)
+model = KNeighborsClassifier(5)
 model.fit(df, features, target)
 # model.training_set()
-print(model.predict(df[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']].head(1000)))
+print(model.predict(df[features].head(10)))
