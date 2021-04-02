@@ -95,6 +95,9 @@ class KNeighborsClassifier(KNeighbors):
             for nei_row, dist, weight in neighbors:
                 class_rank[self.Y[nei_row]] += weight
             prediction.at[row] = max(class_rank, key=class_rank.get)
+
+        # _decode = {val: c for c, val in self._look_up if c in self.}
+
         return prediction
 
 
