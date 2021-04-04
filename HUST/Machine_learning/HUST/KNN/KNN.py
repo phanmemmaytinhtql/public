@@ -37,6 +37,8 @@ class MlModel:
 
     def _clean_data(self, dataset):  # completed
         dataset.dropna(inplace=True)
+        # Problem: Other appropriate method to deal with missing values
+        # Problem: remove noise, inconsistencies
 
     def _encode(self, dataset):  # completed
         if self._look_up is None:       # if we are encoding training set
