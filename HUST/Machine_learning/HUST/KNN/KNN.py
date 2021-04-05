@@ -57,7 +57,6 @@ class MlModel:
             for col in self.features:           # for each feature in the instance
                 dataset.at[row, col] /= (self.max[col] - self.min[col])
 
-
 class KNeighbors(MlModel):
     def __init__(self, k):
         super().__init__()
@@ -116,19 +115,5 @@ class KNeighborsRegressor(KNeighbors):
             neighbors = self.nearest_neighbors(dataset.loc[row, self.features])
             prediction.at[row] = sum(weight * self.Y[nei_row] for nei_row, dist, weight in neighbors) \
                                 / sum(weight for nei_index, dist, weight in neighbors)
-
-
-# df = pd.read_csv("healthcare-dataset-stroke-data.csv", index_col="id")
-# features = ['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']
-# target = 'stroke'
-# print(df[target].tail(18))
-
-df = pd.read_csv("iris.csv")
-features = ['A', 'B', 'C', 'D']
-target = 'Type'
-print(df[target].tail(24))
-
-model = KNeighborsClassifier(10)
-model.fit(df.head(105), features, target)
-print(model.predict(df[features].tail(24)).head(24))
-print(model._look_up)
+            print(row, '\t', prediction.at[row])
+            # print([self.Y[nei_row] for nei_row, dist, weight in neighbors])
