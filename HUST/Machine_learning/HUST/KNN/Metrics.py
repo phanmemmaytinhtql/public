@@ -3,7 +3,7 @@ def mean_absolute_error(y_true, y_pred):
 
 
 def mean_square_error(y_true, y_pred):
-    return sum((y_true[row] - y_pred[row]) ** 2 for row in y_pred.index) / len(y_true)
+    return sum((y_true[row] - y_pred[row])**2 for row in y_pred.index) / len(y_true)
 
 
 def accuracy_score(y_true, y_pred):

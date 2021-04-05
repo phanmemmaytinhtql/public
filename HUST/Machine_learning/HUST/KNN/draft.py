@@ -25,11 +25,11 @@ def get_as(nei_num, train_set, features, target):
     kf = KFold(5)
     accuracy_sum = 0
     for train_index, val_index in kf.split(train_set):
-        print(train_set.loc[train_index])
+        print(train_set[train_index])
         model = KNeighborsClassifier(nei_num)
-        model.fit(train_set.loc[train_index], features, target)
-        y_true = train_set.loc[val_index, target].replace(model._look_up)
-        y_pred = model.predict(train_set.loc[val_index, features])
+        model.fit(train_set[train_index], features, target)
+        y_true = train_set[val_index, target].replace(model._look_up)
+        y_pred = model.predict(train_set[val_index, features])
         accuracy_sum += accuracy_score(y_true, y_pred)
     return accuracy_sum/5
 
