@@ -1,33 +1,50 @@
 from random import randrange
 
 from KNN import *
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, KFold
 from Metrics import *
+import numpy as np
 
 
-# df = pd.read_csv("Datasets/healthcare-dataset-stroke-data.csv", index_col="id")
-# features = ['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']
-# target = 'stroke'
-# print(df[target].tail(18))
+df = pd.read_csv("Datasets/healthcare-dataset-stroke-data.csv", index_col="id")
+features = ['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']
+target = 'stroke'
 
-df = pd.read_csv("Datasets/iris.csv")
-features = ['A', 'B', 'C', 'D']
-target = 'Type'
+# df = pd.read_csv("Datasets/iris.csv")
+# features = ['A', 'B', 'C', 'D']
+# target = 'Type'
 
 # df = pd.read_csv("Datasets/melb_data.csv")
 # features = ['Rooms', 'Bathroom', 'Landsize', 'Lattitude', 'Longtitude']
 # target = "Price"
 
+# Split dataset into train_set and test_set
 train_set, test_set = train_test_split(df, random_state = 1)
 
-model = KNeighborsClassifier(5)
-model.fit(train_set, features, target)
-y_pred = model.predict(test_set[features])
+def get_as(nei_num, train_set, features, target):
+    kf = KFold(5)
+    accuracy_sum = 0
+    for train_index, val_index in kf.split(train_set):
+        print(train_set.loc[train_index])
+        model = KNeighborsClassifier(nei_num)
+        model.fit(train_set.loc[train_index], features, target)
+        y_true = train_set.loc[val_index, target].replace(model._look_up)
+        y_pred = model.predict(train_set.loc[val_index, features])
+        accuracy_sum += accuracy_score(y_true, y_pred)
+    return accuracy_sum/5
+
+ass = {nei_num: get_as(nei_num, train_set, features, target) for nei_num in np.arange(3, 21, 2)}
+
+best_k = max(ass, key=ass.get)
+
+model = KNeighborsClassifier(best_k)
+model.fit(test_set, features, target)
 y_true = test_set[target].replace(model._look_up)
-print(accuracy_score(y_true, y_pred))
+y_pred = model.predict(test_set[features])
 print(y_true)
 print(y_pred)
-
+print(best_k)
+print(get_as(y_true, y_pred))
 
 
 
