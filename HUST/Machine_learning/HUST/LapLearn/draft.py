@@ -1,5 +1,4 @@
 from random import randrange
-
 from neighbors.KNN import *
 from sklearn.model_selection import train_test_split, KFold
 from metrics.Metrics import *
@@ -33,18 +32,18 @@ def get_as(nei_num, train_set, features, target):
         accuracy_sum += accuracy_score(y_true, y_pred)
     return accuracy_sum/5
 
-ass = {nei_num: get_as(nei_num, train_set, features, target) for nei_num in np.arange(3, 21, 2)}
+# ass = {nei_num: get_as(nei_num, train_set, features, target) for nei_num in np.arange(3, 21, 2)}
+#
+# best_k = max(ass, key=ass.get)
 
-best_k = max(ass, key=ass.get)
-
-model = KNeighborsClassifier(best_k)
-model.fit(test_set, features, target)
-y_true = test_set[target].replace(model._look_up)
+model = KNeighborsClassifier(5)
+model.fit(train_set, features, target)
+print(model.features)
 y_pred = model.predict(test_set[features])
-print(y_true)
+print(test_set[target])
 print(y_pred)
-print(best_k)
-print(get_as(y_true, y_pred))
+# print(best_k)
+# print(get_as(y_true, y_pred))
 
 
 

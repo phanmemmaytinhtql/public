@@ -1,63 +1,10 @@
-from Distance import *
-import numpy as np
 import pandas as pd
-from pandas.api.types import is_numeric_dtype
-import copy
+
+from neighbors.Distance import *
+from _base import *
 
 
-class MlModel:
-
-    def __init__(self):
-        self.df = None
-        self.X = None
-        self.Y = None
-        self.features = None
-        self.max = self.min = None
-        self._look_up = None
-        self.attr_weight = None
-
-    def fit(self, dataset, features, target, attr_weight=None):
-        self.df = copy.deepcopy(dataset)  # assume dataset is dataframe
-        self.features = features  # list of feature specified by user
-        self.attr_weight = [1] * len(features) if attr_weight is None else attr_weight
-
-        self._preprocess(self.df)  # clean, encode, normalize data before
-
-        self.X = self.df[features]  # spliting dataframe into X train
-        self.Y = self.df[target]    # and Y train
-
-    def predict(self, dataset):
-        raise NotImplementedError
-        # Problem: Must be re-implemented by subclass -> research Metaclass
-
-    def _preprocess(self, dataset):  # completed
-        self._clean_data(dataset)   # clean missing values
-        self._encode(dataset)       # encode non-numeric values to numeric
-        self._normalize(dataset)    # normalize features
-
-    def _clean_data(self, dataset):  # completed
-        dataset.dropna(inplace=True)
-        # Problem: Other appropriate method to deal with missing values
-        # Problem: remove noise, inconsistencies
-
-    def _encode(self, dataset):  # completed
-        if self._look_up is None:       # if we are encoding training set
-            self._look_up = dict()      # initialize lookup table as empty
-            for col in dataset:
-                if not is_numeric_dtype(dataset[col]):             # for each column that is not numeric
-                    for val, label in enumerate(dataset[col].unique()):   # attach a encode value for each of its label
-                        self._look_up[label] = val                        # add that value to the lookup table
-
-        dataset.replace(self._look_up, inplace=True)
-
-    def _normalize(self, dataset):  # completed
-        if self.max is None:                # if we are normalizing the training set
-            self.max, self.min = dataset.max(), dataset.min()        # find max, min value for each columns
-        for row in dataset.index:           # for each row in dataset
-            for col in self.features:           # for each feature in the instance
-                dataset.at[row, col] /= (self.max[col] - self.min[col])
-
-class KNeighbors(MlModel):
+class KNeighbors(ModelBase):
     def __init__(self, k):
         super().__init__()
         self.k = k              # number of nearest neighbors
@@ -81,7 +28,7 @@ class KNeighbors(MlModel):
         return 1 / (1 + d)
 
 
-class KNeighborsClassifier(KNeighbors):
+class KNeighborsClassifier(KNeighbors, ClassificationBase):
 
     def predict(self, dataset):
 
@@ -96,8 +43,9 @@ class KNeighborsClassifier(KNeighbors):
             for nei_row, dist, weight in neighbors:
                 class_rank[self.Y[nei_row]] += weight
             prediction.at[row] = max(class_rank, key=class_rank.get)
+            print(row, prediction.at[row])
 
-        # _decode = {val: c for c, val in self._look_up if c in self.}
+        prediction.replace({self._look_up[c]:c for c in self.classes}, inplace=True)
 
         return prediction
 
