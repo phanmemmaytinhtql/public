@@ -8,15 +8,18 @@ from linear_model.linear_model import *
 # df = pd.read_csv("datasets/healthcare-dataset-stroke-data.csv", index_col="id")
 # features = ['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi','smoking_status']
 # target = 'stroke'
+# theta = [-0.09091942 -0.0188816   0.19456024  0.04605918  0.05421833  0.03504612
+#   0.03727865 -0.00307349  0.05013373 -0.0322395   0.00370181]
+
 #
-df = pd.read_csv("datasets/iris.csv")
-features = ['A', 'B', 'C', 'D']
-target = 'Type'
+# df = pd.read_csv("datasets/iris.csv")
+# features = ['A', 'B', 'C', 'D']
+# target = 'Type'
 # theta = [  2.74452555   6.29489051  -1.19124088 -11.24087591   4.39270073]
 
-# df = pd.read_csv("datasets/melb_data.csv")
-# features = ['Rooms', 'Bathroom', 'Landsize', 'Lattitude', 'Longtitude']
-# target = "Price"
+df = pd.read_csv("datasets/melb_data.csv")
+features = ['Rooms', 'Bathroom', 'Landsize', 'Lattitude', 'Longtitude']
+target = "Price"
 
 # Split dataset into train_set and test_set
 train_set, test_set = train_test_split(df, random_state = 1)
@@ -38,8 +41,14 @@ train_set, test_set = train_test_split(df, random_state = 1)
 # best_k = max(ass, key=ass.get)
 
 model = LinearModelBase()
-model.fit(train_set.head(5), features, target)
-print(model.theta)
+model.fit(train_set, features, target)
+# print("Train set\n", train_set[features].head(2))
+y_true = test_set[target]
+print("Y_TRUE = ", y_true, sep='\n')
+y_pred = model.predict(test_set[features])
+print("Y_PRED = ", y_pred, sep='\n')
+print(mean_absolute_error(y_true, y_pred))
+
 
 
 

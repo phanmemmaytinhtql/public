@@ -13,13 +13,28 @@ class LinearModelBase(ModelBase):
         self.theta = None
 
     def fit(self, dataset, features, target, attr_weight=None):
+        dataset.insert(0, "Bias", 1)
         super().fit(dataset, features, target, attr_weight)
-        self.X.insert(0, "Bias", 1)         # insert additional column for bias unit
-        self.theta = np.ones(len(self.features) + 1)        # include bias unit
+        self.features.append("Bias")
+        self.theta = np.ones(len(self.features))        # include bias unit
         self.minimize_J()
+
+    def _preprocess(self, dataset):
+        super()._preprocess(dataset)
+        # print("Line 24\n", dataset.head(2))
+
+    def _normalize(self, dataset):
+        """Normalize values in each columns (except target) to range [0, 1]."""
+        if self.max is None:                # if we are normalizing the training set
+            self.max, self.min = dataset.max(), dataset.min()        # find max, min value for each columns
+        for row in dataset.index:           # for each row in dataset
+            for col in self.features:           # for each feature in the instance (exclude target)
+                if col != "Bias":
+                    dataset.at[row, col] = (dataset.at[row, col] - self.min[col]) / (self.max[col] - self.min[col])
 
     # @abstractmethod
     def H(self, X):
+        # print(X.head(2))
         X = X.to_numpy()
         return X @ self.theta
 
@@ -36,12 +51,20 @@ class LinearModelBase(ModelBase):
         pass
 
     def by_norm_eq(self):
+        # print("Line 54\n", self.X.head(2))
         X = self.X.to_numpy()
         Y = self.Y.to_numpy()
         return inv(X.T @ X) @ X.T @ Y
 
     def predict(self, dataset):
-        pass
+        dataset = copy.deepcopy(dataset)
+        self._preprocess(dataset)
+        # print("Line 62\n", dataset.head(2))
+        H = self.H(dataset)
+        prediction = prediction = pd.Series(index=dataset.index, dtype=int)
+        for row in range(len(dataset)):
+            prediction.iat[row] = H[row]
+        return prediction
 
 
 

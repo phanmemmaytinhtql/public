@@ -18,7 +18,7 @@ class ModelBase(ABC):
         """
         self.X = None
         self.Y = None
-        self.features = None
+        self.features = []
         self.max = self.min = None
         self._look_up = None
         self.attr_weight = None
@@ -35,7 +35,7 @@ class ModelBase(ABC):
         """
         col_names = features + [target]
         dataset = copy.deepcopy(dataset[col_names])
-        self.features = features
+        self.features.extend(features)
         self.attr_weight = [1] * len(features) if attr_weight is None else attr_weight
 
         self._preprocess(dataset)
