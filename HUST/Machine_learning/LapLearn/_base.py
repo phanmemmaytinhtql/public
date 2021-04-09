@@ -82,7 +82,7 @@ class ModelBase(ABC):
             self.max, self.min = dataset.max(), dataset.min()        # find max, min value for each columns
         for row in dataset.index:           # for each row in dataset
             for col in self.features:           # for each feature in the instance (exclude target)
-                dataset.at[row, col] = (dataset.at[row, col] - self.min[col]) / (self.max[col] - self.min[col])
+                dataset.at[row, col] = (dataset.at[row, col] - self.min[col]) / (self.max[col] - self.min[col]) if col != "Bias" else 1
 
 
 class ClassificationBase(ModelBase, ABC):

@@ -42,11 +42,10 @@ train_set, test_set = train_test_split(df, random_state = 1)
 
 
 y_true = test_set[target]
-print("Y_TRUE =\n", y_true)
+# print("Y_TRUE =\n", y_true.head(10))
 
 print("PREDICTING WITH LINEAR REGRESSION MODEL")
 model = LinearModelBase()
-print("> WITH theta =", model.theta)
 
 # print("PREDICTING WITH KNN MODEL")
 # model = KNeighborsRegressor(5)
@@ -57,7 +56,20 @@ print("Y_PRED =\n", y_pred)
 print(mean_absolute_error(y_true, y_pred))
 
 
-
+# RESULT: MELBOURNE DATA
+# Y_INDEX =     Y_TRUE          GRAD(alpha = 0.3)       NORM_EQ             KNN(k = 5)
+#  321          1640000         1.595685e+06            1.595685e+06        1318160
+# 4003          675000          1.258827e+06            1.258827e+06        913696
+# 13348         2800000         1.328519e+06            1.328519e+06        2061178
+# 2697          615000          7.707764e+05            7.707764e+05        726652
+# 12600         2700000         1.442426e+06            1.442426e+06        1967970
+# 479           411000          7.119605e+05            7.119605e+05        621454
+# 8339          630000          1.307020e+06            1.307020e+06        718966
+# 11128         1440000         1.566784e+06            1.566784e+06        1181499
+# 5518          887000          7.875797e+05            7.875797e+05        923563
+# 12093         1640000         1.408225e+06            1.408225e+06        1333999
+#
+# MAE           0               1457.7122125593455      1457.7121782159224  896.4727540500736
 
 
 

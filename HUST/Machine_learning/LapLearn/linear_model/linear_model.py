@@ -25,14 +25,6 @@ class LinearModelBase(ModelBase):
         # print("> theta BECOMES: ", self.theta)
 
 
-    def _normalize(self, dataset):
-        """Normalize values in each columns (except target) to range [0, 1]."""
-        if self.max is None:                # if we are normalizing the training set
-            self.max, self.min = dataset.max(), dataset.min()        # find max, min value for each columns
-        for row in dataset.index:           # for each row in dataset
-            for col in self.features:           # for each feature in the instance (exclude target)
-                dataset.at[row, col] = (dataset.at[row, col] - self.min[col]) / (self.max[col] - self.min[col]) if col != "Bias" else 1
-
     # @abstractmethod
     def H(self, X):
         # print(X.head(2))
@@ -46,23 +38,23 @@ class LinearModelBase(ModelBase):
         return 1/(2*m) * (H - Y).T @ (H - Y)
 
     def minimize_J(self):
-        self.theta = self.by_grad_desc(0.01)
+        self.theta = self.by_grad_desc(0.5)
 
     def by_grad_desc(self, alpha):
         cost_hist = []
         X = self.X.to_numpy()
         Y = self.Y.to_numpy()
-        m = len(X)
-        while len(cost_hist) < 20 or abs(cost_hist[-1] - cost_hist[-20]) > 1e-3:
+        m = len(self.X)
+        while len(cost_hist) < 20 or abs(cost_hist[-1] - cost_hist[-20]) > 1e-2:
             cost_hist.append(self.J())
             # print("> COMPUTING theta BY GRAD DESC")
-            # print("> X =\n", X)
-            # print("> Y =\n", Y)
             self.theta = self.theta - alpha/m * X.T @ (X @ self.theta - Y)
-            print("> THEN theta =", self.theta)
+            # print("> THEN theta =", self.theta)
+            # print("> AND DIFF COST =", cost_hist[-1] - cost_hist[max(-20, -len(cost_hist))])
 
         plt.plot(list(range(len(cost_hist))), cost_hist)
         plt.show()
+        print("> COMPUTING theta AFTER", len(cost_hist), "ITERATIONS")
 
         return self.theta
 
