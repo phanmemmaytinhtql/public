@@ -46,6 +46,7 @@ print("Y_TRUE =\n", y_true)
 
 print("PREDICTING WITH LINEAR REGRESSION MODEL")
 model = LinearModelBase()
+print("> WITH theta =", model.theta)
 
 # print("PREDICTING WITH KNN MODEL")
 # model = KNeighborsRegressor(5)
@@ -54,6 +55,15 @@ model.fit(train_set, features, target)
 y_pred = model.predict(test_set[features].head(10))
 print("Y_PRED =\n", y_pred)
 print(mean_absolute_error(y_true, y_pred))
+
+
+
+
+
+
+
+
+
 
 
 

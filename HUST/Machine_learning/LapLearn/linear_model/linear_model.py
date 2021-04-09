@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.linalg import inv
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 from _base import *
 
@@ -46,10 +46,29 @@ class LinearModelBase(ModelBase):
         return 1/(2*m) * (H - Y).T @ (H - Y)
 
     def minimize_J(self):
-        self.theta = self.by_norm_eq()
+        self.theta = self.by_grad_desc(0.01)
 
     def by_grad_desc(self, alpha):
-        pass
+        cost_hist = []
+        X = self.X.to_numpy()
+        Y = self.Y.to_numpy()
+        m = len(X)
+        while len(cost_hist) < 20 or abs(cost_hist[-1] - cost_hist[-20]) > 1e-3:
+            cost_hist.append(self.J())
+            # print("> COMPUTING theta BY GRAD DESC")
+            # print("> X =\n", X)
+            # print("> Y =\n", Y)
+            self.theta = self.theta - alpha/m * X.T @ (X @ self.theta - Y)
+            print("> THEN theta =", self.theta)
+
+        plt.plot(list(range(len(cost_hist))), cost_hist)
+        plt.show()
+
+        return self.theta
+
+
+
+
 
     def by_norm_eq(self):
         # print("> OPTIMIZING theta VIA NORM EQ:")
@@ -57,6 +76,7 @@ class LinearModelBase(ModelBase):
         X = self.X.to_numpy()
         Y = self.Y.to_numpy()
         return inv(X.T @ X) @ X.T @ Y
+
 
     def predict(self, dataset):
         # print("PREDICTION STAGE:")
