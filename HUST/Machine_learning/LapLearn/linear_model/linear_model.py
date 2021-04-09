@@ -13,15 +13,17 @@ class LinearModelBase(ModelBase):
         self.theta = None
 
     def fit(self, dataset, features, target, attr_weight=None):
-        dataset.insert(0, "Bias", 1)
+        # print("TRAINING STAGE:")
         super().fit(dataset, features, target, attr_weight)
+        self.X.insert(0, "Bias", 1)
         self.features.append("Bias")
         self.theta = np.ones(len(self.features))        # include bias unit
+        # print("> AFTER PROCESS DATA AND ADD Bias:")
+        # print("> theta BECOMES: ", self.theta)
         self.minimize_J()
+        # print("> AFTER OPTIMIZING theta:")
+        # print("> theta BECOMES: ", self.theta)
 
-    def _preprocess(self, dataset):
-        super()._preprocess(dataset)
-        # print("Line 24\n", dataset.head(2))
 
     def _normalize(self, dataset):
         """Normalize values in each columns (except target) to range [0, 1]."""
@@ -29,8 +31,7 @@ class LinearModelBase(ModelBase):
             self.max, self.min = dataset.max(), dataset.min()        # find max, min value for each columns
         for row in dataset.index:           # for each row in dataset
             for col in self.features:           # for each feature in the instance (exclude target)
-                if col != "Bias":
-                    dataset.at[row, col] = (dataset.at[row, col] - self.min[col]) / (self.max[col] - self.min[col])
+                dataset.at[row, col] = (dataset.at[row, col] - self.min[col]) / (self.max[col] - self.min[col]) if col != "Bias" else 1
 
     # @abstractmethod
     def H(self, X):
@@ -51,17 +52,23 @@ class LinearModelBase(ModelBase):
         pass
 
     def by_norm_eq(self):
-        # print("Line 54\n", self.X.head(2))
+        # print("> OPTIMIZING theta VIA NORM EQ:")
+        # print("> TRAINING SET HAS COL: ", self.X.columns)
         X = self.X.to_numpy()
         Y = self.Y.to_numpy()
         return inv(X.T @ X) @ X.T @ Y
 
     def predict(self, dataset):
+        # print("PREDICTION STAGE:")
+        # print("> INPUT:\n", dataset.columns)
         dataset = copy.deepcopy(dataset)
+        dataset.insert(0, "Bias", 1)
         self._preprocess(dataset)
-        # print("Line 62\n", dataset.head(2))
+        # print("> AFTER PROCESS: dataset becomes:\n", dataset.columns)
+        # print("> theta FOR COMPUTING H:\n", self.theta)
+
         H = self.H(dataset)
-        prediction = prediction = pd.Series(index=dataset.index, dtype=int)
+        prediction = pd.Series(index=dataset.index, dtype=float)
         for row in range(len(dataset)):
             prediction.iat[row] = H[row]
         return prediction

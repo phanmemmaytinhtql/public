@@ -18,7 +18,7 @@ class ModelBase(ABC):
         """
         self.X = None
         self.Y = None
-        self.features = []
+        self.features = None
         self.max = self.min = None
         self._look_up = None
         self.attr_weight = None
@@ -35,7 +35,7 @@ class ModelBase(ABC):
         """
         col_names = features + [target]
         dataset = copy.deepcopy(dataset[col_names])
-        self.features.extend(features)
+        self.features = features[:]
         self.attr_weight = [1] * len(features) if attr_weight is None else attr_weight
 
         self._preprocess(dataset)
@@ -72,6 +72,7 @@ class ModelBase(ABC):
                 if not is_numeric_dtype(dataset[col]):             # for each column that is not numeric
                     for val, label in enumerate(dataset[col].unique()):   # attach a encode value for each of its label
                         self._look_up[label] = val                        # add that value to the lookup table
+        # Problem: Try other method of pandas for this task
 
         dataset.replace(self._look_up, inplace=True)
 

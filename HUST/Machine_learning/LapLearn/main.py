@@ -40,17 +40,20 @@ train_set, test_set = train_test_split(df, random_state = 1)
 #
 # best_k = max(ass, key=ass.get)
 
-model = LinearModelBase()
-model.fit(train_set, features, target)
-# print("Train set\n", train_set[features].head(2))
+
 y_true = test_set[target]
-print("Y_TRUE = ", y_true, sep='\n')
-y_pred = model.predict(test_set[features])
-print("Y_PRED = ", y_pred, sep='\n')
+print("Y_TRUE =\n", y_true)
+
+print("PREDICTING WITH LINEAR REGRESSION MODEL")
+model = LinearModelBase()
+
+# print("PREDICTING WITH KNN MODEL")
+# model = KNeighborsRegressor(5)
+
+model.fit(train_set, features, target)
+y_pred = model.predict(test_set[features].head(10))
+print("Y_PRED =\n", y_pred)
 print(mean_absolute_error(y_true, y_pred))
-
-
-
 
 
 

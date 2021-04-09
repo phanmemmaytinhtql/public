@@ -63,4 +63,5 @@ class KNeighborsRegressor(KNeighborsBase, RegressionModel):
             neighbors = self.nearest_neighbors(dataset.loc[row, self.features])
             prediction.at[row] = sum(weight * self.Y[nei_row] for nei_row, dist, weight in neighbors) \
                                 / sum(weight for nei_index, dist, weight in neighbors)
-            print(row, prediction.at[row])
+
+        return prediction
