@@ -38,19 +38,20 @@ class LinearModelBase(ModelBase):
         return 1/(2*m) * (H - Y).T @ (H - Y)
 
     def minimize_J(self):
-        self.theta = self.by_grad_desc(0.5)
+        self.theta = self.by_grad_desc(3)
 
     def by_grad_desc(self, alpha):
         cost_hist = []
         X = self.X.to_numpy()
         Y = self.Y.to_numpy()
         m = len(self.X)
-        while len(cost_hist) < 20 or abs(cost_hist[-1] - cost_hist[-20]) > 1e-2:
+        while len(cost_hist) < 20 or abs(cost_hist[-1] - cost_hist[-20]) > 5e-2:
             cost_hist.append(self.J())
             # print("> COMPUTING theta BY GRAD DESC")
             self.theta = self.theta - alpha/m * X.T @ (X @ self.theta - Y)
             # print("> THEN theta =", self.theta)
             # print("> AND DIFF COST =", cost_hist[-1] - cost_hist[max(-20, -len(cost_hist))])
+        # PROBLEM: HOW TO SELECT SUITABLE ALPHA AUTOMATICALLY
 
         plt.plot(list(range(len(cost_hist))), cost_hist)
         plt.show()
