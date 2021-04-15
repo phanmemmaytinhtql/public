@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from _base import *
 
-
+# PROBLEM: Regularization
 class LinearModelBase(ModelBase):
 
     def __init__(self, grad_step=None):
@@ -24,7 +24,6 @@ class LinearModelBase(ModelBase):
         self.minimize_J()
         # print("> AFTER OPTIMIZING theta:")
         # print("> theta BECOMES: ", self.theta)
-
 
     @abstractmethod
     def H(self, X):
@@ -60,41 +59,16 @@ class LinearModelBase(ModelBase):
 
         return self.theta
 
-
-
-
-
     def by_norm_eq(self):
         # print("> OPTIMIZING theta VIA NORM EQ:")
-        # print("> TRAINING SET HAS COL: ", self.X.columns)
         X = self.X.to_numpy()
         Y = self.Y.to_numpy()
         return inv(X.T @ X) @ X.T @ Y
 
 
-    def predict(self, dataset):
-        # print("PREDICTION STAGE:")
-        # print("> INPUT:\n", dataset.columns)
-        dataset = copy.deepcopy(dataset)
-        dataset.insert(0, "Bias", 1)
-        self._preprocess(dataset)
-        # print("> AFTER PROCESS: dataset becomes:\n", dataset.columns)
-        # print("> theta FOR COMPUTING H:\n", self.theta)
-
-        H = self.H(dataset)
-        prediction = pd.Series(index=dataset.index, dtype=float)
-        for row in range(len(dataset)):
-            prediction.iat[row] = H[row]
-        return prediction
-
-
-
-
 class LinearRegression(LinearModelBase, RegressionModel):
 
-    # @abstractmethod
     def H(self, X):
-        # print(X.head(2))
         X = X.to_numpy()
         return X @ self.theta
 
@@ -104,8 +78,6 @@ class LinearRegression(LinearModelBase, RegressionModel):
         m = len(self.X)
         return 1/(2*m) * (H - Y).T @ (H - Y)
 
-
-
     def predict(self, dataset):
         # print("PREDICTION STAGE:")
         # print("> INPUT:\n", dataset.columns)
@@ -122,21 +94,20 @@ class LinearRegression(LinearModelBase, RegressionModel):
         return prediction
 
 
-
 class LogisticRegression(LinearModelBase, ClassificationBase):
+
+    def __init__(self, grad_step):
+        super().__init__(grad_step)
 
     def H(self, X):
         X = X.to_numpy()
-        sigmoid = np.vectorize(lambda z: 1/(1 + np.exp(-z)))
-        return sigmoid(X @ self.theta)
+        return 1/(1 + np.exp(-X @ self.theta))
 
     def J(self):
         H = self.H(self.X)
         Y = self.Y.to_numpy()
         m = len(self.X)
-        log = np.vectorize(np.log2)
-        return 1/m * (- Y.T @ log(H) - (1 - Y).T @ log(1 - H))
-
+        return 1/m * (- Y.T @ np.log2(H) - (1 - Y).T @ np.log2(1 - H))
 
     def predict(self, dataset):
         if len(self.classes) > 2:
