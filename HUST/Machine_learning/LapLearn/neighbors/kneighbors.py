@@ -13,7 +13,8 @@ class KNeighborsBase(ModelBase, ABC):
     def nearest_neighbors(self, z):
         """Find k nearest neighbors of instance x.
 
-        Return [index of neighbor instances ins dataframe, distance, distance weight]."""
+        Return [index of neighbor instances ins dataframe, distance, distance weight].
+        """
         neighbors = []  # an empty list to store neighbors index, distance, weight to training sets
 
         for row in self.X.index:                                # for each instance in training set
