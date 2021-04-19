@@ -1,3 +1,5 @@
+-- create database IT3090E_704709;
+
 drop table if exists job_history;
 drop table if exists employees;
 drop table if exists job_grades;
@@ -96,10 +98,10 @@ create table job_grades (
     constraint pk_jobgrades primary key (grade_level)
 );
 
-insert into regions(region_name) values ('Europe');
-insert into regions(region_name) values ('Africa');
-insert into regions(region_name) values ('America');
-insert into regions(region_name) values ('Pacific');
+insert into regions(region_name, region_id) values ('Europe', 2);
+insert into regions(region_name, region_id) values ('Africa', 3);
+insert into regions(region_name, region_id) values ('America', 4);
+insert into regions(region_name, region_id) values ('Pacific', 5);
 
 insert into countries(country_id, country_name, region_id) values (2, 'Laos', 1);
 insert into countries(country_id, country_name, region_id) values (3, 'Cuba', 4);
@@ -125,11 +127,11 @@ insert into job_history(employee_id, start_date, end_date, job_id, department_id
 delete from countries
 where country_id = '2';
 
-delete from countries
-where country_id = '3';
-
-delete from employees
-where employee_id = 7563;
+-- delete from countries
+-- where country_id = '3';
+--
+-- delete from employees
+-- where employee_id = 7563;
 
 delete from job_history
 where employee_id = 7836;
