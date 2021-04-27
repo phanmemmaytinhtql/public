@@ -166,3 +166,96 @@ from (select invoice, sum(salary) total_salary
         where intervention = interv_no and product = reference) S
     group by invoice) S3
 where S2.invoice = S3.invoice;
+
+-- HOTELS RELATIONAL MODEL
+
+create table hotels2 (
+    hotel_no varchar(5) not null primary key,
+    hotel_name varchar(20),
+    zip varchar(5),
+    city varchar(20));
+
+create table rooms2 (
+    hotel_no varchar(5) not null references hotels2(hotel_no),
+    room_no integer not null,
+    type varchar,
+    price float,
+    primary key (hotel_no, room_no));
+
+create table customers2 (
+    cust_no varchar(5) not null primary key,
+    cust_name varchar(20),
+    country varchar(20));
+
+create table bookings2 (
+    hotel varchar(5) not null references hotels2(hotel_no),
+    customer varchar(20) not null references customers2(cust_no),
+    arrival_data date,
+    departure_date date,
+    room integer,
+    primary key (hotel, customer, arrival_data));
+
+-- 3. Which are the hotels from Niort that hosted all the customers from Spain?
+
+select hotel_no
+from hotels2 h
+where city = 'Niort' and
+      not exists (
+          select cust_no
+          from customers2
+          where country = 'Spain' and
+                cust_no not in (
+                    select customer
+                    from bookings2
+                    where hotel = h.hotel_no
+                  )
+          );
+
+-- select a hotel A such that it is in Niort
+-- query the list B of customers who've booked the hotel A
+-- query the list C of customers from Spain
+-- if there's any customer from C who is not in B
+-- then A is not in the result
+
+-- 4. Customers who booked in all the hotels of Niort.
+
+select cust_no
+from customers2 c
+where not exists (
+    select hotel_no
+    from hotels2
+    where city = 'Niort' and
+          hotel_no not in (
+              select hotel
+              from bookings2
+              where customer = c.cust_no
+              )
+    );
+
+-- + select the customer A
+-- + query the list B of hotels that A has booked.
+-- + query the list C of all hotels in Niort.
+-- + if there's any hotel in C that is not in B
+-- + then A is not appear in the result
+
+-- 5. Hotels that hosted all the customers from Switzerland.
+
+select hotel_no
+from hotels2 h
+where not exists(
+    select cust_no
+    from customers2
+    where country = 'Switzerland' and
+          cust_no not in (
+              select customer
+              from bookings2
+              where hotel = h.hotel_no
+            )
+    );
+
+-- select a hotel A
+-- query the list B of customers who've booked hotel A
+-- query the list C of all the customers from Switzerland
+-- if there's any customers from C that is not in B
+-- then A is not in the result
+
