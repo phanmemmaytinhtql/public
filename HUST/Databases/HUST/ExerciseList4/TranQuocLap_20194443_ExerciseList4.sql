@@ -154,18 +154,19 @@ group by invoice;
 -- salary of the technician (depending on his hourly rate and of the time spent), for each
 -- intervention depending on that invoice.
 
-select S2.invoice, (S2.total_salary + S3.total_unit)
+select S2.invoice, (coalesce(S2.total_salary, 0) + coalesce(S3.total_unit, 0))
 from (select invoice, sum(salary) total_salary
     from (select invoice, hour_rate * duration salary
         from interventions, technicians
         where technician = tech_no) S1
-    group by invoice) S2,
-    (select invoice, sum(unit_price) total_unit
-    from (select invoice, unit_price
+    group by invoice) S2
+	full outer join
+    (select invoice, sum(t_unit) total_unit
+    from (select invoice, unit_price * qtity t_unit
         from interventions, replacements, products
         where intervention = interv_no and product = reference) S
-    group by invoice) S3
-where S2.invoice = S3.invoice;
+    group by invoice) S3 on 
+S2.invoice = S3.invoice;
 
 -- HOTELS RELATIONAL MODEL
 
